@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Candidate</title>
+</head>
+<body>
+    <h2>Create Candidate</h2>
+    <form method="post" th:action="@{/candidates}" th:object="${candidate}">
+        <label>Name:</label>
+        <label>
+            <input type="text" th:field="*{name}"/>
+        </label><br/><br/>
+
+        <label>Party:</label>
+        <label>
+            <input type="text" th:field="*{party}"/>
+        </label><br/><br/>
+
+        <label>Image:</label>
+        <label>
+            <input type="text" th:field="*{image}"/>
+        </label><br/><br/>
+
+        <input type="submit" value="Create"/>
+    </form>
+</body>
+</html>

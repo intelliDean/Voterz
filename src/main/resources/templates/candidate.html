@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Candidates</title>
+</head>
+<body>
+    <h2>Candidates</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Party</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="candidate : ${candidates}">
+                <td th:text="${candidate.name}"></td>
+                <td th:text="${candidate.party}"></td>
+                <td><img th:src="${candidate.image}" width="50" alt="" src=""/></td>
+                <td>
+                    <form method="post" th:action="@{/candidates/__${candidate.id}__/delete}">
+                        <input type="submit" value="Delete"/>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br/>
+    <a href="/candidates/create">Create Candidate</a>
+</body>
+</html>
