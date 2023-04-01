@@ -33,13 +33,14 @@ public class VoterServiceImpl implements VoterService {
     public RegisterResponse register(VoterRegisterRequest voterRequest) {
         //validate age
         boolean invalidAge = voterRequest.getAge() < 18;
-        if (voterRequest.getName() == null || invalidAge) {
+        if (invalidAge) {
             throw new VoterzException("Registration failed");
         }
 
         //get user data and save in the db
         Voter voter = Voter.builder()
-                .name(voterRequest.getName())
+                .firstName(voterRequest.getFirstName())
+                .lastName(voterRequest.getLastName())
                 .age(voterRequest.getAge())
                 .build();
         Voter savedVoter = voterRepository.save(voter);

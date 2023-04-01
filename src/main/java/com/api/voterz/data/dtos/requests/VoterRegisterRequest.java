@@ -1,5 +1,9 @@
 package com.api.voterz.data.dtos.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 @Getter
@@ -8,6 +12,11 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class VoterRegisterRequest {
-    private String name;
+    @NotEmpty @NotNull @NotBlank
+    private String firstName;
+    @NotEmpty @NotNull @NotBlank
+    private String lastName;
+
+    @Positive @NotEmpty @NotNull @NotBlank
     private int age;
 }

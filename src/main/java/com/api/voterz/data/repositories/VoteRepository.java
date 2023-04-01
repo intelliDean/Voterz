@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface VoteRepository extends JpaRepository<Vote, Long> {
     Optional<List<Vote>> findAllByCandidate_Id(Long candidateId);
-    Optional<Vote> findVoteByVoter_VoterId(Long voterId);
+    Optional<Vote> findVoteByVoter_Id(Long voterId);
     Long countAllByCandidate_Id(Long candidateId);
 }

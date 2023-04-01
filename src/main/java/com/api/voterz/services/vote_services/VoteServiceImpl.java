@@ -70,7 +70,7 @@ public class VoteServiceImpl implements VoteService {
 
     @Override
     public Vote getVoteByVoterId(Long voterId) {
-        return voteRepository.findVoteByVoter_VoterId(voterId)
+        return voteRepository.findVoteByVoter_Id(voterId)
                 .orElseThrow(()-> new VoterzException("Vote could not be found"));
     }
 
