@@ -1,69 +1,73 @@
 package com.api.voterz.controller;
 
 import com.api.voterz.data.dtos.requests.CandidateRegisterRequest;
-import com.api.voterz.data.dtos.responses.CandidateResponse;
+import com.api.voterz.data.dtos.responses.CandidateDTO;
+import com.api.voterz.data.dtos.responses.GlobalApiResponse;
 import com.api.voterz.data.dtos.responses.RegisterResponse;
+import com.api.voterz.data.dtos.responses.UpdateResponse;
+import com.api.voterz.data.models.Candidate;
 import com.api.voterz.services.candidate_services.CandidateService;
+import com.api.voterz.utilities.Paginate;
 import com.github.fge.jsonpatch.JsonPatch;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/candidates")
+@RequestMapping("/api/v1/candidate")
 public class CandidateController {
     private final CandidateService candidateService;
 
-    @PostMapping("register")
+    @PostMapping
     public ResponseEntity<?> registerCandidate(@ModelAttribute CandidateRegisterRequest registerCandidate) {
-        RegisterResponse response = candidateService.register(registerCandidate);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+        GlobalApiResponse response = candidateService.register(registerCandidate);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/get/{candidateId}")
-    public ResponseEntity<CandidateResponse> getCandidateById(@PathVariable Long candidateId) {
-        CandidateResponse candidate = candidateService.getCandidateById(candidateId);
+    public ResponseEntity<CandidateDTO> getCandidateById(@PathVariable Long candidateId) {
+        CandidateDTO candidate = candidateService.getCandidateById(candidateId);
         return ResponseEntity.ok(candidate);
     }
 
     @GetMapping("/getAll/{pageNumber}")
-    public ResponseEntity<?> getAllCandidates(@PathVariable int pageNumber) {
-        var candidates = candidateService.getAllCandidates(pageNumber);
-        return ResponseEntity.ok(candidates.getContent());
+    public ResponseEntity<Paginate<CandidateDTO>> getAllCandidates(@PathVariable int pageNumber) {
+        Paginate<CandidateDTO> candidates = candidateService.getAllCandidates(pageNumber);
+        return ResponseEntity.ok(candidates);
     }
     @GetMapping("getAll")
     public  ResponseEntity<?> getAll() {
-        var response = candidateService.getCandidates();
+        List<Candidate> response = candidateService.getCandidates();
         return ResponseEntity.ok(response);
     }
-
-
-    @PatchMapping(value = "{candidateId}", consumes = "application/json-patch+json")
+    @PatchMapping("{candidateId}")
     public ResponseEntity<?> updateCandidate(@PathVariable Long candidateId, @RequestBody JsonPatch updatedPatch) {
         try {
-            var response = candidateService.updateCandidate(candidateId, updatedPatch);
+            GlobalApiResponse response = candidateService.updateCandidate(candidateId, updatedPatch);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
     @PostMapping("changeImage/{candidateId}")
-    public ResponseEntity<?> changeCandidateImage(@PathVariable Long candidateId, @ModelAttribute MultipartFile candidateImage) {
+    public ResponseEntity<GlobalApiResponse> changeCandidateImage(@PathVariable Long candidateId, @ModelAttribute MultipartFile candidateImage) {
         var response = candidateService.changeCandidateImage(candidateId, candidateImage);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("{candidateId}")
-    public ResponseEntity<?> deleteCandidateById(@PathVariable Long candidateId) {
+    public ResponseEntity<GlobalApiResponse> deleteCandidateById(@PathVariable Long candidateId) {
         var response = candidateService.deleteById(candidateId);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/deleteAll")
-    public ResponseEntity<?> deleteAllCandidates() {
+    public ResponseEntity<GlobalApiResponse> deleteAllCandidates() {
        var response = candidateService.deleteAll();
         return ResponseEntity.ok(response);
     }

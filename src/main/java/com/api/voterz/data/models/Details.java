@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
-import java.util.Set;
+import javax.persistence.Column;
 
 @Getter
 @Setter
@@ -14,10 +14,16 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @Entity
-public class Admin {
+public class Details {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String employeeId;
-    private Set<Role> role;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String password;
+    private String image;
+    private Integer age;
+    @Column(columnDefinition = "ENUM('Yes', 'No')")
+    private Boolean registered;
 }

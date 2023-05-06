@@ -9,9 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @AllArgsConstructor
@@ -21,20 +22,15 @@ public class ResultServiceImpl implements ResultService {
 
 
     @Override
-    public CollationResponse collateResult () {
+    public CollationResponse collateResult() {
         List<Candidate> allCandidates = candidateService.getCandidates();
         List<Long> candidateId = new ArrayList<>();
-        for (Candidate allCandidate : allCandidates) {
-            candidateId.add(allCandidate.getId());
-        }
-
-        for (int i = 0; i < candidateService.numberOfCandidates(); i++) {
-            candidateService.getCandidate(candidateId.get(i))
-                    .setNumberOfVotes(voteService
-                            .numberOfVotesByCandidateId(
-                                    candidateId.get(i)));
-
-        }
+        allCandidates.forEach(candidate -> candidateId.add(candidate.getId()));
+        IntStream.range(0, candidateService.numberOfCandidates().intValue()).forEach(i -> {
+            Long id = candidateId.get(i);
+            Candidate candidate = candidateService.getCandidate(id);
+            candidate.setNumberOfVotes(voteService.numberOfVotesByCandidateId(id));
+        });
         return CollationResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Result collated successfully")
@@ -45,12 +41,11 @@ public class ResultServiceImpl implements ResultService {
     @Override
     public Map<String, Long> result() {
         List<Candidate> allCandidates = candidateService.getCandidates();
-
-        Map<String, Long> electionResult = new HashMap<>();
-        for (int i = 0; i < candidateService.numberOfCandidates(); i++) {
-            electionResult.put(allCandidates.get(i).getLastName(),
-                    allCandidates.get(i).getNumberOfVotes());
-        }
-        return electionResult;
+        return IntStream.range(0, candidateService.numberOfCandidates().intValue())
+                .boxed()
+                .collect(Collectors.toMap(
+                        i -> allCandidates.get(i).getDetails().getLastName(),
+                        i -> allCandidates.get(i).getNumberOfVotes()
+                ));
     }
 }

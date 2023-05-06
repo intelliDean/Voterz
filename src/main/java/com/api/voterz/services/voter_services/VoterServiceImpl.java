@@ -1,12 +1,14 @@
 package com.api.voterz.services.voter_services;
 
 import com.api.voterz.data.dtos.requests.VoterRegisterRequest;
+import com.api.voterz.data.dtos.responses.GlobalApiResponse;
 import com.api.voterz.data.dtos.responses.RegisterResponse;
-import com.api.voterz.data.dtos.responses.UpdateResponse;
+import com.api.voterz.data.models.Details;
 import com.api.voterz.data.models.Voter;
 import com.api.voterz.data.repositories.VoterRepository;
-import com.api.voterz.exceptions.ImageUploadException;
 import com.api.voterz.exceptions.VoterzException;
+import com.api.voterz.services.details_service.DetailService;
+import com.api.voterz.utilities.Utilities;
 import com.api.voterz.utilities.cloud_image.CloudImageService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,11 +16,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -26,46 +25,39 @@ import java.util.List;
 @Service
 public class VoterServiceImpl implements VoterService {
     private final VoterRepository voterRepository;
-    private CloudImageService cloudImageService;
+    private final CloudImageService cloudImageService;
+    private final DetailService detailService;
 
 
     @Override
     public RegisterResponse register(VoterRegisterRequest voterRequest) {
-        //validate age
-        boolean invalidAge = voterRequest.getAge() < 18;
-        if (invalidAge) {
-            throw new VoterzException("Registration failed");
-        }
+        int age = Utilities.calculateAge(voterRequest.getDateOfBirth());
+        boolean invalidAge = age < 18;
+        if (invalidAge) throw new VoterzException("Registration failed");
 
-        //get user data and save in the db
         Voter voter = Voter.builder()
-                .firstName(voterRequest.getFirstName())
-                .lastName(voterRequest.getLastName())
-                .age(voterRequest.getAge())
+                .details(Details.builder()
+                        .firstName(voterRequest.getFirstName())
+                        .lastName(voterRequest.getLastName())
+                        .email(voterRequest.getEmail())
+                        .password(voterRequest.getPassword())
+                        .age(age)
+                        .build())
                 .build();
-        Voter savedVoter = voterRepository.save(voter);
+        Details details = detailService.uploadImage(voter.getDetails(), voterRequest.getImage());
+        details.setRegistered(true);
+        voterRepository.save(voter);
 
         return RegisterResponse.builder()
-                .id(savedVoter.getId())
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Voter saved! Upload picture to complete registration")
+                .message("Registration completed successfully")
                 .registered(true)
                 .build();
     }
 
     @Override
-    public RegisterResponse completeRegistration(Long voterId, MultipartFile voterImage) {
-        Voter voter = getVoterById(voterId);
-
-        String imageUrl = uploadImage(voterImage);
-
-        return endRegistration(voter, imageUrl);
-    }
-
-    @Override
     public Voter getVoterById(Long voterId) {
         return voterRepository.findById(voterId)
-                .orElseThrow(()->new VoterzException("Voter could not be found"));
+                .orElseThrow(() -> new VoterzException("Voter could not be found"));
     }
 
     @Override
@@ -74,7 +66,7 @@ public class VoterServiceImpl implements VoterService {
     }
 
     @Override
-    public UpdateResponse updateVoter(Long voterId, JsonPatch updatePatch) {
+    public GlobalApiResponse updateVoter(Long voterId, JsonPatch updatePatch) {
         Voter voter = getVoterById(voterId);
         ObjectMapper mapper = new ObjectMapper();
 
@@ -83,12 +75,11 @@ public class VoterServiceImpl implements VoterService {
             JsonNode updatedNode = updatePatch.apply(node);
             Voter updatedVoter = mapper.convertValue(updatedNode, Voter.class);
             Voter savedVoter = voterRepository.save(updatedVoter);
-            return UpdateResponse.builder()
+            return GlobalApiResponse.builder()
                     .message("Voter updated successfully")
-                    .updateTime(LocalDateTime.now().toString())
                     .build();
         } catch (JsonPatchException e) {
-            throw new RuntimeException(e);
+            throw new VoterzException("Update failed");
         }
     }
 
@@ -103,32 +94,7 @@ public class VoterServiceImpl implements VoterService {
     }
 
     @Override
-    public Voter saveVoter(Voter voter) {
-        return voterRepository.save(voter);
+    public void saveVoter(Voter voter) {
+        voterRepository.save(voter);
     }
-
-    private RegisterResponse endRegistration(Voter voter, String imageUrl) {
-        voter.setImage(imageUrl);
-        voter.setRegistered(true);
-
-        Voter registeredVoter = voterRepository.save(voter);
-        return RegisterResponse.builder()
-                .id(registeredVoter.getId())
-                .statusCode(HttpStatus.CREATED.value())
-                .message("Voter registered successfully")
-                .registered(true)
-                .build();
-    }
-
-    private String uploadImage(MultipartFile voterImage) {
-        //upload image
-        String imageUrl = cloudImageService.upload(voterImage);
-        //if image not uploaded, data saved but registration incomplete
-        if (imageUrl == null) {
-            throw new ImageUploadException("Registration incomplete! Upload your image to complete registration");
-        }
-        return imageUrl;
-    }
-
-
 }

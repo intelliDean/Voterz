@@ -32,13 +32,13 @@ public class VoteServiceImpl implements VoteService {
         Voter voter = voterService.getVoterById(voteRequest.getVoterId());
 
         //validation
-        if (!candidate.isRegistered()) {
+        if (!candidate.getDetails().getRegistered()) {
             throw new VoterzException(String.format("Candidate with id %d is not qualified", candidate.getId()));
         }
-        if (!voter.isRegistered()) {
+        if (!voter.getDetails().getRegistered()) {
             throw new VoterzException("You are not qualified to vote");
         }
-        if (voter.isVoted()) throw new VoterzException("You have voted already");
+        if (voter.getVoted()) throw new VoterzException("You have voted already");
 
         //vote casting
         Vote vote = Vote.builder()
@@ -56,7 +56,7 @@ public class VoteServiceImpl implements VoteService {
         voterService.saveVoter(voter);
         return CastedVoteResponse.builder()
                 .id(castedVoted.getId())
-                .message(String.format("You have casted your voted for candidate %s successfully", candidate.getFirstName()+ " " +candidate.getLastName()))
+                .message(String.format("You have casted your voted for candidate %s successfully", candidate.getDetails().getFirstName()+ " " +candidate.getDetails().getLastName()))
                 .successful(true)
                 .statusCode(HttpStatus.CREATED.value())
                 .build();

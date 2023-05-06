@@ -27,11 +27,20 @@ public class CandidateRegisterRequest {
     @NotEmpty(message = "Party cannot be empty")
     @NotBlank(message = "Party cannot be blank")
     private Party party;
-    @Positive
-    private int age;
+    @NotNull(message = "Party cannot be null")
+    @NotEmpty(message = "Party cannot be empty")
+    @NotBlank(message = "Party cannot be blank")
+    private String email;
+    @NotNull(message = "Party cannot be null")
+    @NotEmpty(message = "Party cannot be empty")
+    @NotBlank(message = "Party cannot be blank")
+    private String password;
+    @NotNull(message = "Party cannot be null")
+    @NotBlank(message = "Party cannot be blank")
+    private String dateOfBirth;
     @NotEmpty(message = "Election cannot be empty")
     @NotNull(message = "Election cannot be nul")
     private ElectionType electionType;
     @NotNull(message = "Image uploading is very important to complete registration")
-    MultipartFile candidateImage;
+    MultipartFile image;
 }

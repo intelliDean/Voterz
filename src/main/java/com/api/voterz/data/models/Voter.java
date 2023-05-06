@@ -1,5 +1,7 @@
 package com.api.voterz.data.models;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,10 +16,8 @@ public class Voter {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String firstName;
-    private String lastName;
-    private int age;
-    private String image;
-    private boolean registered;
-    private boolean voted;
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonUnwrapped
+    private Details details;
+    private Boolean voted;
 }

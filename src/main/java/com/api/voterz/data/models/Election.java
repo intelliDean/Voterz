@@ -21,4 +21,5 @@ public class Election {
     private List<Candidate> candidates;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private  List<Voter> voters;
+    private int year;
 }
