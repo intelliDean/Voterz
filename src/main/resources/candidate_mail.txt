@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <p>
+      Dear %s,<br><br>
+
+We are excited to have you as a candidate for the upcoming election!<br>
+We hope you're looking forward to this opportunity to showcase your<br>
+leadership skills and vision for our community.
+
+We wanted to reach out to you to provide some guidelines for the election<br>
+process. Please take a few minutes to read through the information below to<br>
+ensure that you are fully prepared for the upcoming election.<br><br>
+
+Firstly, please note that the election will take place on %s from <br>
+%s to %s. You will be given a unique link to access <br>
+the voting platform during this time.<br><br>
+
+As a candidate, it is important that you adhere to the following guidelines:<br>
+
+You are not allowed to campaign during the voting period. This includes sending <br>
+unsolicited emails, making phone calls or messages to voters.<br>
+You may only campaign before the voting period begins. You may use social media <br>
+or other channels to spread your message and inform potential voters about your candidacy.<br>
+You must not engage in any activity that is deemed to be fraudulent or unfair, <br>
+including buying votes or tampering with the voting system.<br>
+We also wanted to provide you with some information about your candidacy. <br>
+The information we have on file for you is as follows:<br><br>
+
+Name: %s<br>
+Email: %s<br>
+Age: %d<br>
+Party: %s<br>
+Election Type: [%s]<br>
+Please let us know if there are any errors or omissions in this information. <br>
+It is important that we have the correct details for all candidates.<br><br>
+
+Thank you for your participation in this election. We wish you all the best of luck!<br><br>
+
+Best regards,<br>
+Michael Dean<br>
+    </p>
+  </body>
+</html>

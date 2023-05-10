@@ -5,10 +5,9 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @Builder
 public class EmailRequest {
-    private Email sender;
+    private final Email sender = new Email("INEC", "info@inec_ng.org");
     private Email recipient;
     private String subject;
     private String content;

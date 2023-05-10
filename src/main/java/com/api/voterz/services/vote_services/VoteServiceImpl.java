@@ -3,6 +3,7 @@ package com.api.voterz.services.vote_services;
 import com.api.voterz.data.dtos.requests.VoteRequest;
 import com.api.voterz.data.dtos.responses.CastedVoteResponse;
 import com.api.voterz.data.models.Candidate;
+import com.api.voterz.data.models.Details;
 import com.api.voterz.data.models.Vote;
 import com.api.voterz.data.models.Voter;
 import com.api.voterz.data.repositories.VoteRepository;
@@ -30,16 +31,58 @@ public class VoteServiceImpl implements VoteService {
     public CastedVoteResponse castVote(VoteRequest voteRequest) {
         Candidate candidate = candidateService.getCandidate(voteRequest.getCandidateId());
         Voter voter = voterService.getVoterById(voteRequest.getVoterId());
+        // Validation
+        validateCandidate(candidate);
+        validateVoter(voter);
+        validateVoteStatus(voter);
+        // Make the vote
+        Details candidateDetails = makeVote(voteRequest, candidate, voter);
+        String fullName = String.format("%s %s", candidateDetails.getFirstName(), candidateDetails.getLastName());
 
-        //validation
+        return CastedVoteResponse.builder()
+                .message(String.format("You have casted your vote for candidate %s successfully", fullName))
+                .successful(true)
+                .statusCode(HttpStatus.CREATED.value())
+                .build();
+    }
+
+    private void validateCandidate(Candidate candidate) {
         if (!candidate.getDetails().getRegistered()) {
             throw new VoterzException(String.format("Candidate with id %d is not qualified", candidate.getId()));
         }
+    }
+
+    private void validateVoter(Voter voter) {
         if (!voter.getDetails().getRegistered()) {
             throw new VoterzException("You are not qualified to vote");
         }
-        if (voter.getVoted()) throw new VoterzException("You have voted already");
+    }
 
+    private void validateVoteStatus(Voter voter) {
+        if (voter.getVoted()) {
+            throw new VoterzException("You have voted already");
+        }
+    }
+
+    private Details makeVote(VoteRequest voteRequest, Candidate candidate, Voter voter) {
+        Details voterDetails = voter.getDetails();
+        Details candidateDetails = candidate.getDetails();
+
+        boolean eligible = false;
+        switch (candidate.getElectionType()) {
+            case PRESIDENT -> voteCandidate(voteRequest, candidate, voter);
+            case GOVERNOR -> eligible = voterDetails.getState().equals(candidateDetails.getState());
+            case SENATOR, NATIONAL_LAWMAKER, STATE_LAWMAKER ->
+                    eligible = voterDetails.getConstituency().equals(candidateDetails.getConstituency());
+            case LG_CHAIRMAN, COUNCILOR -> eligible = voterDetails.getLg().equals(candidateDetails.getLg());
+        }
+
+        if (eligible) {
+            voteCandidate(voteRequest, candidate, voter);
+        }
+        return candidateDetails;
+    }
+    private void voteCandidate(VoteRequest voteRequest, Candidate candidate, Voter voter) {
         //vote casting
         Vote vote = Vote.builder()
                 .candidate(candidate)
@@ -48,41 +91,33 @@ public class VoteServiceImpl implements VoteService {
                 .casted(true)
                 .type(voteRequest.getElectionType())
                 .build();
-
         voter.setVoted(true);
-
         //save vote
-        Vote castedVoted = voteRepository.save(vote);
+        voteRepository.save(vote);
         voterService.saveVoter(voter);
-        return CastedVoteResponse.builder()
-                .id(castedVoted.getId())
-                .message(String.format("You have casted your voted for candidate %s successfully", candidate.getDetails().getFirstName()+ " " +candidate.getDetails().getLastName()))
-                .successful(true)
-                .statusCode(HttpStatus.CREATED.value())
-                .build();
     }
 
     @Override
     public Vote getVoteById(Long voteId) {
         return voteRepository.findById(voteId)
-                .orElseThrow(()-> new VoterzException("Vote could not be found"));
+                .orElseThrow(() -> new VoterzException("Vote could not be found"));
     }
 
     @Override
     public Vote getVoteByVoterId(Long voterId) {
         return voteRepository.findVoteByVoter_Id(voterId)
-                .orElseThrow(()-> new VoterzException("Vote could not be found"));
+                .orElseThrow(() -> new VoterzException("Vote could not be found"));
     }
 
     @Override
     public List<Vote> getVotesByCandidateId(Long candidateId) {
         return voteRepository.findAllByCandidate_Id(candidateId)
-                .orElseThrow(()-> new VoterzException("votes could not be found"));
+                .orElseThrow(() -> new VoterzException("votes could not be found"));
     }
 
     @Override
     public Long numberOfVotesByCandidateId(Long candidateId) {
-       return voteRepository.countAllByCandidate_Id(candidateId);
+        return voteRepository.countAllByCandidate_Id(candidateId);
     }
 
     @Override

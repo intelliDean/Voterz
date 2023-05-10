@@ -8,6 +8,7 @@ import com.api.voterz.data.models.Voter;
 import com.api.voterz.data.repositories.VoterRepository;
 import com.api.voterz.exceptions.VoterzException;
 import com.api.voterz.services.details_service.DetailService;
+import com.api.voterz.utilities.Paginate;
 import com.api.voterz.utilities.Utilities;
 import com.api.voterz.utilities.cloud_image.CloudImageService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,9 +17,17 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.List;
+
+import static com.api.voterz.utilities.Utilities.MAX_PER_PAGE;
 
 @AllArgsConstructor
 @Slf4j
@@ -27,6 +36,7 @@ public class VoterServiceImpl implements VoterService {
     private final VoterRepository voterRepository;
     private final CloudImageService cloudImageService;
     private final DetailService detailService;
+    private final ModelMapper modelMapper;
 
 
     @Override
@@ -42,10 +52,12 @@ public class VoterServiceImpl implements VoterService {
                         .email(voterRequest.getEmail())
                         .password(voterRequest.getPassword())
                         .age(age)
+                        .lg(voterRequest.getLg())
+                        .constituency(voterRequest.getConstituency())
+                        .state(voterRequest.getState())
                         .build())
                 .build();
-        Details details = detailService.uploadImage(voter.getDetails(), voterRequest.getImage());
-        details.setRegistered(true);
+        voter.getDetails().setRegistered(true);
         voterRepository.save(voter);
 
         return RegisterResponse.builder()
@@ -61,6 +73,16 @@ public class VoterServiceImpl implements VoterService {
     }
 
     @Override
+    public Page<Voter> getVoters(int pageNumber) {
+        pageNumber = pageNumber < 0 ? 1 : pageNumber - 1;
+        Pageable pageable = PageRequest.of(pageNumber, MAX_PER_PAGE);
+        Page<Voter> voters = voterRepository.findAll(pageable);
+        Type type = new TypeToken<Paginate<Voter>>() {
+        }.getType();
+        return modelMapper.map(voters, type);
+    }
+
+    @Override
     public List<Voter> getAllVoters() {
         return voterRepository.findAll();
     }
@@ -73,8 +95,8 @@ public class VoterServiceImpl implements VoterService {
         JsonNode node = mapper.convertValue(voter, JsonNode.class);
         try {
             JsonNode updatedNode = updatePatch.apply(node);
-            Voter updatedVoter = mapper.convertValue(updatedNode, Voter.class);
-            Voter savedVoter = voterRepository.save(updatedVoter);
+            voter = mapper.convertValue(updatedNode, Voter.class);
+            voterRepository.save(voter);
             return GlobalApiResponse.builder()
                     .message("Voter updated successfully")
                     .build();

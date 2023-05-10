@@ -6,6 +6,7 @@ import com.api.voterz.data.dtos.responses.RegisterResponse;
 import com.api.voterz.data.dtos.responses.UpdateResponse;
 import com.api.voterz.data.models.Voter;
 import com.github.fge.jsonpatch.JsonPatch;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 public interface VoterService {
     RegisterResponse register(VoterRegisterRequest voterRequest);
     Voter getVoterById(Long voterId);
+    Page<Voter> getVoters(int pageNumber);
     List<Voter> getAllVoters();
     GlobalApiResponse updateVoter(Long voterId, JsonPatch updatePatch);
     void deleteVoterById(Long voterId);

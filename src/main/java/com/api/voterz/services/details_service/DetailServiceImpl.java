@@ -18,9 +18,7 @@ public class DetailServiceImpl implements DetailService {
 
     public Details uploadImage(Details details, MultipartFile candidateImage) {
         String imageUploaded = cloudImageService.upload(candidateImage);
-        if (imageUploaded == null) {
-            throw new ImageUploadException(INCOMPLETE_REG);
-        }
+        if (imageUploaded == null) throw new ImageUploadException(INCOMPLETE_REG);
         details.setImage(imageUploaded);
         return details;
     }

@@ -1,7 +1,6 @@
 package com.api.voterz.data.dtos.requests;
 
-import com.api.voterz.data.models.ElectionType;
-import com.api.voterz.data.models.Party;
+import com.api.voterz.data.models.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,34 +12,15 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 @NotNull
 public class CandidateRegisterRequest {
-    @NotNull(message = "First Name cannot be null")
-    @NotEmpty(message = "First Name cannot be empty")
-    @NotBlank(message = "First Name cannot be blank")
-    @Size(min = 3, max = 255)
     private String firstName;
-    @NotNull(message = "Last Name cannot be null")
-    @NotEmpty(message = "Last Name cannot be empty")
-    @NotBlank(message = "Last Name cannot be blank")
-    @Size(min = 3, max = 255)
     private String lastName;
-    @NotNull(message = "Party cannot be null")
-    @NotEmpty(message = "Party cannot be empty")
-    @NotBlank(message = "Party cannot be blank")
     private Party party;
-    @NotNull(message = "Party cannot be null")
-    @NotEmpty(message = "Party cannot be empty")
-    @NotBlank(message = "Party cannot be blank")
     private String email;
-    @NotNull(message = "Party cannot be null")
-    @NotEmpty(message = "Party cannot be empty")
-    @NotBlank(message = "Party cannot be blank")
     private String password;
-    @NotNull(message = "Party cannot be null")
-    @NotBlank(message = "Party cannot be blank")
     private String dateOfBirth;
-    @NotEmpty(message = "Election cannot be empty")
-    @NotNull(message = "Election cannot be nul")
     private ElectionType electionType;
-    @NotNull(message = "Image uploading is very important to complete registration")
-    MultipartFile image;
+    private LG lg;
+    private Constituency constituency;
+    private State state;
+    private MultipartFile image;
 }

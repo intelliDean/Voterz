@@ -1,5 +1,10 @@
 package com.api.voterz.data.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum ElectionType {
     PRESIDENT("President"),
     SENATOR("Senator"),
@@ -10,12 +15,4 @@ public enum ElectionType {
     COUNCILOR("Councilor");
 
     private final String value;
-
-    ElectionType(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
 }

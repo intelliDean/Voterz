@@ -17,8 +17,8 @@ public class Vote {
     private Voter voter;
     @ManyToOne( fetch = FetchType.LAZY)
     private Candidate candidate;
+    private Boolean casted;
     private String timeCasted;
-    private boolean casted;
     @Enumerated(EnumType.STRING)
     private ElectionType type;
 }

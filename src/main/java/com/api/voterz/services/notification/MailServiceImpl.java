@@ -15,21 +15,38 @@ public class MailServiceImpl implements MailService {
     private final WebClient webClient;
 
     @Override
+//    public String sendHTMLMail(EmailRequest request) {
+//        String url = mailConfig.getMailUrl();
+//        String apiKey = mailConfig.getMailApiKey();
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.set("api-key", apiKey);
+//
+//
+//
+//        return webClient.post()
+//                .uri(url)
+//                .headers(header -> header.addAll(headers))
+//                .body(BodyInserters.fromValue(request))
+//                .retrieve()
+//                .bodyToMono(String.class)
+//                .block();
+//
+//    }
+
     public String sendHTMLMail(EmailRequest request) {
-        String url = mailConfig.getMailUrl();
-        String apiKey = mailConfig.getMailApiKey();
+//    WebClient client = WebClient.builder()
+//            .baseUrl(mailConfig.getMailUrl())
+//            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//            .defaultHeader("api-key", mailConfig.getMailApiKey())
+//            .build();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", apiKey);
+    return webClient.post()
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
+}
 
-        return webClient.post()
-                .uri(url)
-                .headers(header -> header.addAll(headers))
-                .body(BodyInserters.fromValue(request))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-
-    }
 }

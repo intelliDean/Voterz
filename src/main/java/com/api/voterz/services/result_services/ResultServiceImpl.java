@@ -8,11 +8,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @AllArgsConstructor
@@ -24,28 +22,24 @@ public class ResultServiceImpl implements ResultService {
     @Override
     public CollationResponse collateResult() {
         List<Candidate> allCandidates = candidateService.getCandidates();
-        List<Long> candidateId = new ArrayList<>();
-        allCandidates.forEach(candidate -> candidateId.add(candidate.getId()));
-        IntStream.range(0, candidateService.numberOfCandidates().intValue()).forEach(i -> {
-            Long id = candidateId.get(i);
-            Candidate candidate = candidateService.getCandidate(id);
-            candidate.setNumberOfVotes(voteService.numberOfVotesByCandidateId(id));
+        allCandidates.forEach(candidate -> {
+            candidate.setNumberOfVotes(
+                    voteService.numberOfVotesByCandidateId(
+                            candidate.getId()));
         });
+
         return CollationResponse.builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Result collated successfully")
                 .collated(true)
                 .build();
     }
-
     @Override
     public Map<String, Long> result() {
-        List<Candidate> allCandidates = candidateService.getCandidates();
-        return IntStream.range(0, candidateService.numberOfCandidates().intValue())
-                .boxed()
+        return candidateService.getCandidates().stream()
                 .collect(Collectors.toMap(
-                        i -> allCandidates.get(i).getDetails().getLastName(),
-                        i -> allCandidates.get(i).getNumberOfVotes()
+                        candidate -> candidate.getDetails().getLastName(),
+                        Candidate::getNumberOfVotes
                 ));
     }
 }

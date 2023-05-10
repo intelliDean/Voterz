@@ -1,9 +1,6 @@
 package com.api.voterz.data.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -26,4 +23,10 @@ public class Details {
     private Integer age;
     @Column(columnDefinition = "ENUM('Yes', 'No')")
     private Boolean registered;
+    @Enumerated(EnumType.STRING)
+    private LG lg;
+    @Enumerated(EnumType.STRING)
+    private Constituency constituency;
+    @Enumerated(EnumType.STRING)
+    private State state;
 }
